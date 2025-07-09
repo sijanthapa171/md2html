@@ -1,3 +1,3 @@
-# Elex
+# Markdown to HTML Converter
 
-An Elixir project with Nix development environment.
+A command-line tool written in Elixir that converts Markdown files to HTML.

@@ -4,15 +4,15 @@ defmodule Elex do
   """
 
   @doc """
-  Prints "Hello, World!" to the console.
+  Hello world.
 
   ## Examples
 
       iex> Elex.hello()
-      Hello, World!
+      :world
 
   """
   def hello do
-    IO.puts("Hello, World!")
+    :world
   end
-end 
+end

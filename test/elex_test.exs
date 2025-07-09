@@ -3,6 +3,6 @@ defmodule ElexTest do
   doctest Elex
 
   test "greets the world" do
-    assert capture_io(fn -> Elex.hello() end) == "Hello, World!\n"
+    assert Elex.hello() == :world
   end
-end 
+end
