@@ -29,11 +29,27 @@ defmodule Md2html.ParserTest do
       end
       ```
       """
+
       assert Parser.parse(markdown) == [
         {:code_block_start, "elixir"},
         {:p, "def hello do"},
         {:p, "  IO.puts \"Hello\""},
         {:p, "end"},
+        {:code_block_end, ""}
+      ]
+    end
+
+    test "parses empty code blocks" do
+      assert Parser.parse("```\n```") == [
+        {:code_block_start, ""},
+        {:code_block_end, ""}
+      ]
+    end
+
+    test "parses code blocks with language" do
+      assert Parser.parse("```python\nprint('Hello')\n```") == [
+        {:code_block_start, "python"},
+        {:p, "print('Hello')"},
         {:code_block_end, ""}
       ]
     end

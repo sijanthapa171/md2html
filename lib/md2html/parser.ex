@@ -9,8 +9,45 @@ defmodule Md2html.Parser do
   def parse(markdown) when is_binary(markdown) do
     markdown
     |> String.split("\n")
-    |> Enum.map(&String.trim/1)
-    |> Enum.map(&parse_line/1)
+    |> Enum.map(&String.trim_trailing/1)  # Preserve indentation
+    |> parse_lines([], false)  # false means not in code block
+    |> Enum.reverse()
+    |> clean_output()
+  end
+
+  # Clean up the parsed output
+  defp clean_output(elements) do
+    elements
+    |> Enum.filter(fn
+      {:blank, _} -> false
+      _ -> true
+    end)
+  end
+
+  # Parse lines while tracking context
+  defp parse_lines([], acc, _in_code), do: acc
+
+  # Handle code block start
+  defp parse_lines([line | rest], acc, false) when line == "```" do
+    parse_lines(rest, [{:code_block_start, ""} | acc], true)
+  end
+  defp parse_lines(["```" <> lang | rest], acc, false) do
+    parse_lines(rest, [{:code_block_start, String.trim(lang)} | acc], true)
+  end
+
+  # Handle code block end
+  defp parse_lines([line | rest], acc, true) when line == "```" do
+    parse_lines(rest, [{:code_block_end, ""} | acc], false)
+  end
+
+  # Handle regular lines inside code block
+  defp parse_lines([line | rest], acc, true) do
+    parse_lines(rest, [{:p, line} | acc], true)
+  end
+
+  # Handle regular lines outside code block
+  defp parse_lines([line | rest], acc, false) do
+    parse_lines(rest, [parse_line(line) | acc], false)
   end
 
   @doc """
@@ -25,8 +62,6 @@ defmodule Md2html.Parser do
 
   def parse_line("- " <> rest), do: {:ul_item, apply_inline(rest)}
   def parse_line("> " <> rest), do: {:blockquote, apply_inline(rest)}
-  def parse_line("```" <> rest), do: {:code_block_start, rest}
-  def parse_line("```"), do: {:code_block_end, ""}
   def parse_line("---"), do: {:hr, ""}
   def parse_line(""), do: {:blank, ""}
   def parse_line(line), do: {:p, apply_inline(line)}
